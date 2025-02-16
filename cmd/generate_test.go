@@ -181,7 +181,7 @@ func TestNonStringErrorOnExtraDeclaredDependencies(t *testing.T) {
 		filepath.Join("..", "test_examples_errors", "extra_dependency_error"),
 	})
 	err = rootCmd.Execute()
-	
+
 	expectedError := "extra_atlantis_dependencies contains non-string value at position 4"
 	if err == nil || err.Error() != expectedError {
 		t.Errorf("Expected error '%s', got '%v'", expectedError, err)
@@ -644,6 +644,15 @@ func TestEnvHCLProjectMarker(t *testing.T) {
 	runTest(t, filepath.Join("golden", "project_marker.yaml"), []string{
 		"--root",
 		filepath.Join("..", "test_examples", "project_hcl_with_project_marker"),
+		"--project-hcl-files=env.hcl",
+		"--use-project-markers=true",
+	})
+}
+
+func Test1(t *testing.T) {
+	runTest(t, filepath.Join("golden", "project_marker.yaml"), []string{
+		"--root",
+		"/Users/plenikp/workspace/devops/infra-terraform-stack/infra-terragrunt/aws/vantage-dev/us-east-1/vantage/dev/eks-addons/",
 		"--project-hcl-files=env.hcl",
 		"--use-project-markers=true",
 	})

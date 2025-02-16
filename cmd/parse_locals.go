@@ -7,7 +7,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/gruntwork-io/go-commons/errors"
-	"github.com/gruntwork-io/terragrunt/config"
+	deprecatedConfig "github.com/gruntwork-io/terragrunt/config"
 	"github.com/gruntwork-io/terragrunt/config/hclparse"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
@@ -97,14 +97,9 @@ func mergeResolvedLocals(parent ResolvedLocals, child ResolvedLocals) ResolvedLo
 }
 
 // Parses a given file, returning a map of all it's `local` values
-func parseLocals(ctx *config.ParsingContext, path string, includeFromChild *config.IncludeConfig) (ResolvedLocals, error) {
-	file, err := hclparse.NewParser(ctx.ParserOptions...).ParseFromFile(path)
-	if err != nil {
-		return ResolvedLocals{}, err
-	}
-
+func parseLocals(ctx *TerragruntParsingContext, path string, includeFromChild *deprecatedConfig.IncludeConfig) (ResolvedLocals, error) {
 	// Decode just the Base blocks. See the function docs for DecodeBaseBlocks for more info on what base blocks are.
-	baseBlocks, err := config.DecodeBaseBlocks(ctx, file, includeFromChild)
+	baseBlocks, err := ctx.DecodeBaseBlocks(path, includeFromChild)
 	if err != nil {
 		return ResolvedLocals{}, err
 	}

@@ -60,7 +60,7 @@ func createTerragruntEvalContext(ctx *config.ParsingContext, configPath string) 
 // we first see if there are any include blocks without any labels, and if there is, we modify it in the file object to
 // inject the label as "".
 func decodeHcl(
-	ctx *config.ParsingContext,
+	ctx *TerragruntParsingContext,
 	file *hcl.File,
 	filename string,
 	out interface{},
@@ -91,7 +91,7 @@ func decodeHcl(
 		}
 	}
 
-	evalContext, err := createTerragruntEvalContext(ctx, filename)
+	evalContext, err := createTerragruntEvalContext(ctx.ParsingContext, filename)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func decodeHcl(
 // For consistency, `include` in the call to `decodeHcl` is always assumed to be nil. Either it really is nil (parsing
 // the child config), or it shouldn't be used anyway (the parent config shouldn't have an include block).
 func decodeAsTerragruntInclude(
-	ctx *config.ParsingContext,
+	ctx *TerragruntParsingContext,
 	file *hcl.File,
 	filename string,
 ) ([]config.IncludeConfig, error) {
@@ -126,7 +126,7 @@ func decodeAsTerragruntInclude(
 //   - no terraform source defined
 //
 // If both of those are true, it is likely a parent module
-func parseModule(ctx *config.ParsingContext, path string) (isParent bool, includes []config.IncludeConfig, err error) {
+func parseModule(ctx *TerragruntParsingContext, path string) (isParent bool, includes []config.IncludeConfig, err error) {
 	configString, err := util.ReadFileAsString(path)
 	if err != nil {
 		return false, nil, err
