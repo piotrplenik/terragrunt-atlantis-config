@@ -35,14 +35,14 @@ func getEnvs() map[string]string {
 }
 
 func NewParsingContextWithConfigPath(ctx context.Context, terragruntConfigPath string) (*TerragruntParsingContext, error) {
-	options, err := options.NewTerragruntOptionsWithConfigPath(terragruntConfigPath)
+	opt, err := options.NewTerragruntOptionsWithConfigPath(terragruntConfigPath)
 	if err != nil {
 		return nil, err
 	}
-	options.OriginalTerragruntConfigPath = terragruntConfigPath
-	options.Env = getEnvs()
+	opt.OriginalTerragruntConfigPath = terragruntConfigPath
+	opt.Env = getEnvs()
 
-	parsingContext := config.NewParsingContext(ctx, options)
+	parsingContext := config.NewParsingContext(ctx, opt)
 
 	terragruntParsingContext := TerragruntParsingContext{
 		Context:        ctx,
@@ -57,7 +57,6 @@ func NewParsingContextWithDecodeList(ctx *TerragruntParsingContext) *TerragruntP
 	parseCtx := config.NewParsingContext(ctx.ParsingContext, ctx.ParsingContext.TerragruntOptions).
 		WithDecodeList(
 			config.DependencyBlock,
-			config.DependenciesBlock,
 			config.TerraformBlock,
 		)
 
