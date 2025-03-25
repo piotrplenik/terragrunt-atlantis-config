@@ -649,15 +649,6 @@ func TestEnvHCLProjectMarker(t *testing.T) {
 	})
 }
 
-func Test1(t *testing.T) {
-	runTest(t, filepath.Join("golden", "project_marker.yaml"), []string{
-		"--root",
-		"/Users/plenikp/workspace/devops/infra-terraform-stack/infra-terragrunt/aws/vantage-dev/us-east-1/vantage/dev/eks-addons/",
-		"--project-hcl-files=env.hcl",
-		"--use-project-markers=true",
-	})
-}
-
 func TestWithOriginalDir(t *testing.T) {
 	runTest(t, filepath.Join("golden", "withOriginalDir.yaml"), []string{
 		"--root",

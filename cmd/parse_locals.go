@@ -98,6 +98,9 @@ func mergeResolvedLocals(parent ResolvedLocals, child ResolvedLocals) ResolvedLo
 
 // Parses a given file, returning a map of all it's `local` values
 func parseLocals(ctx *TerragruntParsingContext, path string, includeFromChild *deprecatedConfig.IncludeConfig) (ResolvedLocals, error) {
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(ctx.ParsingContext.TerragruntOptions.WorkingDir, path)
+	}
 	// Decode just the Base blocks. See the function docs for DecodeBaseBlocks for more info on what base blocks are.
 	baseBlocks, err := ctx.DecodeBaseBlocks(path, includeFromChild)
 	if err != nil {
