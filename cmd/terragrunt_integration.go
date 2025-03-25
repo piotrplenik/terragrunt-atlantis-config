@@ -111,11 +111,14 @@ func (ctx TerragruntParsingContext) WithDependencyPath(path string) *TerragruntP
 
 // DecodeBaseBlocks Decode just the Base blocks. See the function docs for DecodeBaseBlocks for more info on what base blocks are.
 func (ctx TerragruntParsingContext) DecodeBaseBlocks(path string, includeFromChild *config.IncludeConfig) (*config.DecodedBaseBlocks, error) {
+	parsingContext := ctx.ParsingContext.
+		WithDecodeList(config.DependencyBlock, config.DependenciesBlock, config.TerraformBlock)
+
 	file, err := hclparse.NewParser(ctx.ParsingContext.ParserOptions...).ParseFromFile(path)
 	if err != nil {
 		return nil, err
 	}
-	return config.DecodeBaseBlocks(ctx.ParsingContext, file, includeFromChild)
+	return config.DecodeBaseBlocks(parsingContext, file, includeFromChild)
 }
 
 // FindConfigFilesInPath returns a list of all Terragrunt config files in the given path or any subfolder of the path. A file is a Terragrunt
