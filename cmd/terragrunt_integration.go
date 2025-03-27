@@ -5,6 +5,7 @@ import (
 	"github.com/gruntwork-io/terragrunt/config"
 	"github.com/gruntwork-io/terragrunt/config/hclparse"
 	"github.com/gruntwork-io/terragrunt/options"
+	"github.com/gruntwork-io/terragrunt/pkg/log"
 	"github.com/gruntwork-io/terragrunt/util"
 	"github.com/hashicorp/hcl/v2"
 	"os"
@@ -54,6 +55,7 @@ func NewParsingContextWithConfigPath(ctx context.Context, terragruntConfigPath s
 	}
 	opt.OriginalTerragruntConfigPath = terragruntConfigPath
 	opt.Env = getEnvs()
+	opt.Logger.SetOptions(log.WithLevel(log.ErrorLevel))
 
 	parsingContext := config.NewParsingContext(ctx, opt)
 
@@ -112,6 +114,8 @@ func (ctx TerragruntParsingContext) WithDependencyPath(path string) *TerragruntP
 	terrOpts, _ := options.NewTerragruntOptionsWithConfigPath(path)
 	terrOpts.OriginalTerragruntConfigPath = ctx.ParsingContext.TerragruntOptions.OriginalTerragruntConfigPath
 	terrOpts.Env = ctx.ParsingContext.TerragruntOptions.Env
+	terrOpts.Logger.SetOptions(log.WithLevel(log.ErrorLevel))
+
 	terrContext := config.NewParsingContext(ctx, terrOpts)
 
 	terragruntParsingContext := TerragruntParsingContext{
