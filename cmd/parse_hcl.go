@@ -9,21 +9,9 @@ import (
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"path/filepath"
-	_ "unsafe"
 )
 
 const bareIncludeKey = ""
-
-type parsedHcl struct {
-	Terraform *config.TerraformConfig `hcl:"terraform,block"`
-	Includes  []config.IncludeConfig  `hcl:"include,block"`
-}
-
-// terragruntIncludeMultiple is a struct that can be used to only decode the include block with labels.
-type terragruntIncludeMultiple struct {
-	Include []config.IncludeConfig `hcl:"include,block"`
-	Remain  hcl.Body               `hcl:",remain"`
-}
 
 // updateBareIncludeBlock searches the parsed terragrunt contents for a bare include block (include without a label),
 // and convert it to one with empty string as the label. This is necessary because the hcl parser is strictly enforces
@@ -48,9 +36,6 @@ func updateBareIncludeBlock(file *hcl.File, filename string) ([]byte, bool, erro
 	}
 	return hclFile.Bytes(), codeWasUpdated, nil
 }
-
-//go:linkname createTerragruntEvalContext github.com/gruntwork-io/terragrunt/config.createTerragruntEvalContext
-func createTerragruntEvalContext(ctx *config.ParsingContext, configPath string) (*hcl.EvalContext, error)
 
 // decodeHcl uses the HCL2 parser to decode the parsed HCL into the struct specified by out.
 //

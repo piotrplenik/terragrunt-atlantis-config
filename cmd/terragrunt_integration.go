@@ -6,10 +6,23 @@ import (
 	"github.com/gruntwork-io/terragrunt/config/hclparse"
 	"github.com/gruntwork-io/terragrunt/options"
 	"github.com/gruntwork-io/terragrunt/util"
+	"github.com/hashicorp/hcl/v2"
 	"os"
 	"path/filepath"
 	"strings"
+	_ "unsafe"
 )
+
+type parsedHcl struct {
+	Terraform *config.TerraformConfig `hcl:"terraform,block"`
+	Includes  []config.IncludeConfig  `hcl:"include,block"`
+}
+
+// terragruntIncludeMultiple is a struct that can be used to only decode the include block with labels.
+type terragruntIncludeMultiple struct {
+	Include []config.IncludeConfig `hcl:"include,block"`
+	Remain  hcl.Body               `hcl:",remain"`
+}
 
 type TerragruntParsingContext struct {
 	context.Context
@@ -210,3 +223,6 @@ func getAllTerragruntFiles(path string) ([]string, error) {
 
 	return uniqueConfigFileAbsPaths, nil
 }
+
+//go:linkname createTerragruntEvalContext github.com/gruntwork-io/terragrunt/config.createTerragruntEvalContext
+func createTerragruntEvalContext(ctx *config.ParsingContext, configPath string) (*hcl.EvalContext, error)
