@@ -6,6 +6,7 @@ import (
 	"github.com/gruntwork-io/terragrunt/config/hclparse"
 	"github.com/gruntwork-io/terragrunt/options"
 	"github.com/gruntwork-io/terragrunt/pkg/log"
+	"github.com/gruntwork-io/terragrunt/pkg/log/format"
 	"github.com/gruntwork-io/terragrunt/util"
 	"github.com/hashicorp/hcl/v2"
 	"os"
@@ -48,6 +49,13 @@ func getEnvs() map[string]string {
 	return m
 }
 
+// createLogger creates a logger with proper formatter to avoid nil pointer dereference
+func createLogger() log.Logger {
+	formatter := format.NewFormatter(format.NewKeyValueFormatPlaceholders())
+	formatter.SetDisabledColors(true)
+	return log.New(log.WithLevel(log.ErrorLevel), log.WithFormatter(formatter))
+}
+
 func NewParsingContextWithConfigPath(ctx context.Context, terragruntConfigPath string) (*TerragruntParsingContext, error) {
 	opt, err := options.NewTerragruntOptionsWithConfigPath(terragruntConfigPath)
 	if err != nil {
@@ -55,9 +63,14 @@ func NewParsingContextWithConfigPath(ctx context.Context, terragruntConfigPath s
 	}
 	opt.OriginalTerragruntConfigPath = terragruntConfigPath
 	opt.Env = getEnvs()
-	opt.Logger.SetOptions(log.WithLevel(log.ErrorLevel))
+	
+	// Create logger with proper formatter
+	logger := createLogger()
+	
+	// Attach logger to context
+	ctx = log.ContextWithLogger(ctx, logger)
 
-	parsingContext := config.NewParsingContext(ctx, opt)
+	parsingContext := config.NewParsingContext(ctx, logger, opt)
 
 	terragruntParsingContext := TerragruntParsingContext{
 		Context:        ctx,
@@ -68,8 +81,14 @@ func NewParsingContextWithConfigPath(ctx context.Context, terragruntConfigPath s
 }
 
 func NewParsingContextWithDecodeList(ctx *TerragruntParsingContext) *TerragruntParsingContext {
+	// Create logger with proper formatter
+	logger := createLogger()
+	
+	// Ensure the context has a logger attached
+	contextWithLogger := log.ContextWithLogger(ctx.ParsingContext.Context, logger)
+	
 	// Parse the HCL file
-	parseCtx := config.NewParsingContext(ctx.ParsingContext, ctx.ParsingContext.TerragruntOptions).
+	parseCtx := config.NewParsingContext(contextWithLogger, logger, ctx.ParsingContext.TerragruntOptions).
 		WithDecodeList(
 			config.DependencyBlock,
 			config.TerraformBlock,
@@ -100,7 +119,10 @@ func (ctx TerragruntParsingContext) WithTerragruntOptions(opts *options.Terragru
 }
 
 func (ctx TerragruntParsingContext) PartialParseConfigFile(path string) (*IntegrationTerragruntConfig, error) {
-	parseConfig, err := config.PartialParseConfigFile(ctx.ParsingContext, path, nil)
+	// Create logger with proper formatter
+	logger := createLogger()
+	
+	parseConfig, err := config.PartialParseConfigFile(ctx.ParsingContext, logger, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -114,9 +136,14 @@ func (ctx TerragruntParsingContext) WithDependencyPath(path string) *TerragruntP
 	terrOpts, _ := options.NewTerragruntOptionsWithConfigPath(path)
 	terrOpts.OriginalTerragruntConfigPath = ctx.ParsingContext.TerragruntOptions.OriginalTerragruntConfigPath
 	terrOpts.Env = ctx.ParsingContext.TerragruntOptions.Env
-	terrOpts.Logger.SetOptions(log.WithLevel(log.ErrorLevel))
+	
+	// Create logger with proper formatter
+	logger := createLogger()
+	
+	// Ensure the context has a logger attached
+	contextWithLogger := log.ContextWithLogger(ctx.Context, logger)
 
-	terrContext := config.NewParsingContext(ctx, terrOpts)
+	terrContext := config.NewParsingContext(contextWithLogger, logger, terrOpts)
 
 	terragruntParsingContext := TerragruntParsingContext{
 		Context:        ctx.Context,
@@ -135,7 +162,11 @@ func (ctx TerragruntParsingContext) DecodeBaseBlocks(path string, includeFromChi
 	if err != nil {
 		return nil, err
 	}
-	return config.DecodeBaseBlocks(parsingContext, file, includeFromChild)
+	
+	// Create logger with proper formatter
+	logger := createLogger()
+	
+	return config.DecodeBaseBlocks(parsingContext, logger, file, includeFromChild)
 }
 
 // FindConfigFilesInPath returns a list of all Terragrunt config files in the given path or any subfolder of the path. A file is a Terragrunt
@@ -229,4 +260,4 @@ func getAllTerragruntFiles(path string) ([]string, error) {
 }
 
 //go:linkname createTerragruntEvalContext github.com/gruntwork-io/terragrunt/config.createTerragruntEvalContext
-func createTerragruntEvalContext(ctx *config.ParsingContext, configPath string) (*hcl.EvalContext, error)
+func createTerragruntEvalContext(ctx *config.ParsingContext, l log.Logger, configPath string) (*hcl.EvalContext, error)

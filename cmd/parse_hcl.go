@@ -7,6 +7,7 @@ import (
 	"github.com/gruntwork-io/terragrunt/config"
 	"github.com/gruntwork-io/terragrunt/config/hclparse"
 	"github.com/gruntwork-io/terragrunt/util"
+	"github.com/gruntwork-io/terragrunt/pkg/log"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/gohcl"
 	"github.com/hashicorp/hcl/v2/hclwrite"
@@ -77,7 +78,10 @@ func decodeHcl(
 		}
 	}
 
-	evalContext, err := createTerragruntEvalContext(ctx.ParsingContext, filename)
+	// Create logger for the eval context
+	var logger log.Logger = createLogger()
+	
+	evalContext, err := createTerragruntEvalContext(ctx.ParsingContext, logger, filename)
 	if err != nil {
 		return err
 	}
