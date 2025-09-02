@@ -6,12 +6,13 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/gruntwork-io/go-commons/errors"
 	deprecatedConfig "github.com/gruntwork-io/terragrunt/config"
 	"github.com/gruntwork-io/terragrunt/config/hclparse"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
-	"path/filepath"
 )
 
 // ResolvedLocals are the parsed result of local values this module cares about
