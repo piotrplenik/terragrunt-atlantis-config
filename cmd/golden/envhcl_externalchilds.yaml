@@ -9,6 +9,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: apply_requirements_overrides/child_that_does_not_override
 - apply_requirements:
@@ -18,6 +19,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: apply_requirements_overrides/child_that_overrides
 - apply_requirements: []
@@ -26,6 +28,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: apply_requirements_overrides/child_that_overrides_to_empty
 - autoplan:
@@ -33,6 +36,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: apply_requirements_overrides/standalone_module_that_does_not_specify
 - apply_requirements:
   - mergeable
@@ -41,6 +45,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: apply_requirements_overrides/standalone_module_that_specifies
 - apply_requirements: []
   autoplan:
@@ -48,12 +53,14 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: apply_requirements_overrides/standalone_module_that_specifies_empty
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: autoplan/autoplan_false
 - autoplan:
@@ -61,6 +68,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: autoplan/autoplan_true
 - autoplan:
@@ -68,6 +76,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: autoplan/set_in_parent
 - autoplan:
@@ -75,18 +84,21 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: basic_module
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: chained_dependencies/dependency
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../dependency/terragrunt.hcl
   dir: chained_dependencies/depender
 - autoplan:
@@ -94,6 +106,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../depender/terragrunt.hcl
     - ../dependency/terragrunt.hcl
     - nested/terragrunt.hcl
@@ -103,6 +116,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../../dependency/terragrunt.hcl
   dir: chained_dependencies/depender_on_depender/nested
 - autoplan:
@@ -110,6 +124,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: child_and_parent_specify_workflow/child
   workflow: workflowSpecifiedInChild
@@ -118,12 +133,14 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: different_workflow_names/defaultWorkflow
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: different_workflow_names/workflowA
   workflow: workflowA
 - autoplan:
@@ -131,6 +148,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: different_workflow_names/workflowB
   workflow: workflowB
 - autoplan:
@@ -138,6 +156,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../terraform.tfvars
     - ../dev.tfvars
@@ -150,6 +169,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: extra_arguments/no_files_at_all
 - autoplan:
@@ -157,6 +177,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../dev.tfvars
     - ../us-east-1.tfvars
@@ -168,6 +189,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../terraform.tfvars
   dir: extra_arguments/only_required_files
@@ -176,6 +198,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../../../../common_vars/apps/consul/sg.tfvars
     - main.tfvars
@@ -185,6 +208,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - some_extra_dep
     - ../test_file.json
   dir: extra_dependency/child
@@ -193,6 +217,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../someRandomDir/terragrunt.hcl
   dir: hcl_json/json_expanded
@@ -202,8 +227,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../terragrunt.hcl
   dir: invalid_parent_module/child
 - autoplan:
@@ -211,35 +238,47 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../root-module/*.tf*
+    - ../root-module/*.tofu*
     - ../terraform-module/*.tf*
+    - ../terraform-module/*.tofu*
   dir: local_terraform_abs_module_source/terragrunt-module
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../root-module/*.tf*
+    - ../root-module/*.tofu*
     - ../terraform-module/*.tf*
+    - ../terraform-module/*.tofu*
   dir: local_terraform_module_source/terragrunt-module
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../terraform-another-module/*.tf*
+    - ../terraform-another-module/*.tofu*
     - ../terraform-module/*.tf*
+    - ../terraform-module/*.tofu*
     - ../terraform-module/nested-module/*.tf*
+    - ../terraform-module/nested-module/*.tofu*
   dir: local_tf_module_source/terraform
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
   dir: multi_accounts_vpc_route53_tgw/network-account/eu-west-1/network
 - autoplan:
@@ -247,8 +286,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../env-a/network/vpc/terragrunt.hcl
     - ../../../network-account/eu-west-1/network/transit-gateway/terragrunt.hcl
@@ -258,8 +299,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../../../network-account/eu-west-1/network/transit-gateway/terragrunt.hcl
   dir: multi_accounts_vpc_route53_tgw/prod/eu-west-1/env-a
@@ -268,6 +311,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../use_terraform_12_parent.hcl
     - ../use_terraform_13_parent.hcl
   dir: multiple_includes/includes_tf_12_then_13
@@ -277,6 +321,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../use_terraform_13_parent.hcl
     - ../use_terraform_12_parent.hcl
   dir: multiple_includes/includes_tf_13_then_12
@@ -286,6 +331,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../use_terraform_12_parent.hcl
   dir: multiple_includes/uses_terraform_12
   terraform_version: 0.12.9001
@@ -294,6 +340,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../use_terraform_13_parent.hcl
   dir: multiple_includes/uses_terraform_13
   terraform_version: 0.13.9001
@@ -302,8 +349,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../stage/network/terragrunt.hcl
   dir: no_terraform_blocks/myproject/eu-south-1/infra
@@ -312,8 +361,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
   dir: no_terraform_blocks/myproject/eu-south-1/stage
 - autoplan:
@@ -321,8 +372,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../terragrunt.hcl
   dir: no_terraform_blocks/myproject/global
 - autoplan:
@@ -330,6 +383,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../../parent/terragrunt.hcl
     - some_parent_dep
     - ../file_in_parent_of_child.json
@@ -341,6 +395,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../../parent/terragrunt.hcl
     - some_parent_dep
     - local_tags.yaml
@@ -353,6 +408,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: parent_with_workflow_local/child
   workflow: workflowSpecifiedInParent
@@ -361,8 +417,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../../account.hcl
     - ../region.hcl
@@ -375,8 +433,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../../account.hcl
     - ../region.hcl
@@ -387,8 +447,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../../account.hcl
     - ../region.hcl
@@ -401,8 +463,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../../account.hcl
     - ../region.hcl
@@ -413,78 +477,91 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_bitbucket
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_gcs
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_git_https
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_git_scp_like
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_git_ssh
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_github_https
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_github_ssh
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_http
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_https
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_mercurial
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_s3
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: remote_module_source_terraform_registry
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: skip/skip_false
 - autoplan:
@@ -492,6 +569,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: terraform_version/inherit_from_parent
   terraform_version: 0.12.9001
@@ -500,6 +578,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: terraform_version/override_parent
   terraform_version: 0.13.9001
@@ -508,14 +587,17 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: terraform_version/use_flag_default
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../../../_envcommon/mysql.hcl
     - ../../account.hcl
@@ -527,8 +609,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../../../_envcommon/mysql.hcl
     - ../../account.hcl
@@ -540,8 +624,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../../../_envcommon/mysql.hcl
     - ../../account.hcl
@@ -553,12 +639,14 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: terragrunt_dependency/dependency
 - autoplan:
     enabled: false
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../dependency/terragrunt.hcl
   dir: terragrunt_dependency/depender
 - autoplan:
@@ -566,6 +654,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../common/terragrunt.hcl
     - ../dependency/terragrunt.hcl
@@ -575,6 +664,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: with_original_dir/dependency
 - autoplan:
@@ -582,6 +672,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: with_parent/child
 version: 3

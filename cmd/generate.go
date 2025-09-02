@@ -183,6 +183,7 @@ func getDependencies(ctx *TerragruntParsingContext, path string) ([]string, erro
 				parsedSource = strings.TrimPrefix(parsedSource, "file://")
 
 				dependencies = append(dependencies, filepath.Join(parsedSource, "*.tf*"))
+				dependencies = append(dependencies, filepath.Join(parsedSource, "*.tofu*"))
 
 				ls, err := parseTerraformLocalModuleSource(parsedSource)
 				if err != nil {
@@ -323,13 +324,12 @@ func createProject(ctx context.Context, sourcePath string) (*AtlantisProject, er
 		return nil, nil
 	}
 
-	// All dependencies depend on their own .hcl file, and any tf files in their directory
+	// All dependencies depend on their own .hcl file, and any tf/tofu files in their directory
 	relativeDependencies := []string{
 		"*.hcl",
 		"*.tf*",
+		"*.tofu*",
 	}
-
-	// Add other dependencies based on their relative paths. We always want to output with Unix path separators
 	for _, dependencyPath := range dependencies {
 		absolutePath := dependencyPath
 		if !filepath.IsAbs(absolutePath) {
@@ -481,15 +481,15 @@ func createHclProject(ctx context.Context, sourcePaths []string, workingDir stri
 			return nil, nil
 		}
 
-		// All dependencies depend on their own .hcl file, and any tf files in their directory
+		// All dependencies depend on their own .hcl file, and any tf/tofu files in their directory
 		relativeDependencies := []string{
 			"*.hcl",
 			"*.tf*",
+			"*.tofu*",
 			"**/*.hcl",
 			"**/*.tf*",
+			"**/*.tofu*",
 		}
-
-		// Add other dependencies based on their relative paths. We always want to output with Unix path separators
 		for _, dependencyPath := range dependencies {
 			absolutePath := dependencyPath
 			if !filepath.IsAbs(absolutePath) {
