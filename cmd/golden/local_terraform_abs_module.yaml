@@ -7,8 +7,11 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../root-module/*.tf*
+    - ../root-module/*.tofu*
     - ../terraform-module/*.tf*
+    - ../terraform-module/*.tofu*
   dir: terragrunt-module
 version: 3

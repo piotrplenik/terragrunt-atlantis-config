@@ -7,6 +7,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
     - ../common/terragrunt.hcl
     - ../dependency/terragrunt.hcl
@@ -16,6 +17,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../terragrunt.hcl
   dir: dependency
 version: 3

@@ -6,6 +6,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: dependency
   execution_order_group: 0
   name: dependency
@@ -14,6 +15,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../dependency/terragrunt.hcl
   depends_on:
   - dependency
@@ -25,6 +27,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../../dependency/terragrunt.hcl
   depends_on:
   - dependency
@@ -36,6 +39,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../depender/terragrunt.hcl
     - ../dependency/terragrunt.hcl
     - nested/terragrunt.hcl
