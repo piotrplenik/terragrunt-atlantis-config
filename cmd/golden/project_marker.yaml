@@ -7,8 +7,10 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - '**/*.hcl'
     - '**/*.tf*'
+    - '**/*.tofu*'
     - ../../../terragrunt.hcl
     - ../../account.hcl
     - ../region.hcl

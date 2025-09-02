@@ -6,6 +6,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: dependency
   name: dependency
 - autoplan:
@@ -13,6 +14,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../dependency/terragrunt.hcl
   depends_on:
   - dependency
@@ -23,6 +25,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../depender/terragrunt.hcl
     - ../dependency/terragrunt.hcl
     - nested/terragrunt.hcl
@@ -37,6 +40,7 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
     - ../../dependency/terragrunt.hcl
   depends_on:
   - dependency

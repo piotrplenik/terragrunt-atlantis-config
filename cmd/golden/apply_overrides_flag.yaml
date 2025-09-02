@@ -10,5 +10,6 @@ projects:
     when_modified:
     - '*.hcl'
     - '*.tf*'
+    - '*.tofu*'
   dir: .
 version: 3

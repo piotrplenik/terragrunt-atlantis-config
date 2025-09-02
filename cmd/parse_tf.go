@@ -29,12 +29,16 @@ func parseTerraformLocalModuleSource(path string) ([]string, error) {
 	for _, source := range moduleCallSources {
 		if isLocalTerraformModuleSource(source) {
 			modulePath := util.JoinPath(path, source)
-			modulePathGlob := util.JoinPath(modulePath, "*.tf*")
+			// Include both .tf* and .tofu* files
+			modulePathGlobTf := util.JoinPath(modulePath, "*.tf*")
+			modulePathGlobTofu := util.JoinPath(modulePath, "*.tofu*")
 
-			if _, exists := sourceMap[modulePathGlob]; exists {
-				continue
+			if _, exists := sourceMap[modulePathGlobTf]; !exists {
+				sourceMap[modulePathGlobTf] = true
 			}
-			sourceMap[modulePathGlob] = true
+			if _, exists := sourceMap[modulePathGlobTofu]; !exists {
+				sourceMap[modulePathGlobTofu] = true
+			}
 
 			// find local module source recursively
 			subSources, err := parseTerraformLocalModuleSource(modulePath)
@@ -60,7 +64,7 @@ func parseTerraformLocalModuleSource(path string) ([]string, error) {
 func extractModuleCallSources(dir string) ([]string, error) {
 	var sources []string
 
-	// Find all .tf and .tf.json files
+	// Find all .tf, .tf.json, .tofu, and .tofu.json files
 	files, err := filepath.Glob(filepath.Join(dir, "*.tf"))
 	if err != nil {
 		return nil, err
@@ -69,7 +73,18 @@ func extractModuleCallSources(dir string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	tofuFiles, err := filepath.Glob(filepath.Join(dir, "*.tofu"))
+	if err != nil {
+		return nil, err
+	}
+	tofuJsonFiles, err := filepath.Glob(filepath.Join(dir, "*.tofu.json"))
+	if err != nil {
+		return nil, err
+	}
+
 	files = append(files, jsonFiles...)
+	files = append(files, tofuFiles...)
+	files = append(files, tofuJsonFiles...)
 
 	parser := hclparse.NewParser()
 
@@ -110,9 +125,34 @@ func extractModuleCallsFromFile(file *hcl.File) []string {
 			if block.Type == "module" && len(block.Labels) > 0 {
 				// Look for the source attribute
 				if sourceAttr, exists := block.Body.Attributes["source"]; exists {
-					if sourceValue, diags := sourceAttr.Expr.Value(nil); !diags.HasErrors() {
-						if sourceValue.Type().Equals(cty.String) && sourceValue.IsKnown() && !sourceValue.IsNull() {
-							sources = append(sources, sourceValue.AsString())
+					// Try to evaluate the expression to get the string value
+					sourceVal, diags := sourceAttr.Expr.Value(nil)
+					if !diags.HasErrors() && sourceVal.Type() == cty.String {
+						sources = append(sources, sourceVal.AsString())
+					}
+				}
+			}
+		}
+	} else {
+		// Handle JSON syntax using generic HCL body content extraction
+		content, diags := file.Body.Content(&hcl.BodySchema{
+			Blocks: []hcl.BlockHeaderSchema{
+				{
+					Type:       "module",
+					LabelNames: []string{"name"},
+				},
+			},
+		})
+		if !diags.HasErrors() {
+			for _, block := range content.Blocks {
+				if block.Type == "module" {
+					attrs, diags := block.Body.JustAttributes()
+					if !diags.HasErrors() {
+						if sourceAttr, exists := attrs["source"]; exists {
+							sourceVal, diags := sourceAttr.Expr.Value(nil)
+							if !diags.HasErrors() && sourceVal.Type() == cty.String {
+								sources = append(sources, sourceVal.AsString())
+							}
 						}
 					}
 				}
