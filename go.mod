@@ -1,4 +1,4 @@
-module github.com/transcend-io/terragrunt-atlantis-config
+module github.com/piotrplenik/terragrunt-atlantis-config
 
 go 1.25.5
 

@@ -62,7 +62,7 @@ func decodeHcl(
 	}()
 
 	// Check if we need to update the file to label any bare include blocks.
-	// Excluding json because of https://github.com/transcend-io/terragrunt-atlantis-config/issues/244.
+	// Excluding json because of https://github.com/piotrplenik/terragrunt-atlantis-config/issues/244.
 	if filepath.Ext(filename) != ".json" {
 		updatedBytes, isUpdated, err := updateBareIncludeBlock(file, filename)
 		if err != nil {
