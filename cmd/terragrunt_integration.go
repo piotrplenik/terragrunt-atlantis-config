@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"strings"
+	_ "unsafe"
+
 	"github.com/gruntwork-io/terragrunt/config"
 	"github.com/gruntwork-io/terragrunt/config/hclparse"
 	"github.com/gruntwork-io/terragrunt/options"
 	"github.com/gruntwork-io/terragrunt/pkg/log"
 	"github.com/gruntwork-io/terragrunt/util"
 	"github.com/hashicorp/hcl/v2"
-	"os"
-	"path/filepath"
-	"strings"
-	_ "unsafe"
 )
 
 type parsedHcl struct {
@@ -48,16 +49,15 @@ func getEnvs() map[string]string {
 	return m
 }
 
-func NewParsingContextWithConfigPath(ctx context.Context, terragruntConfigPath string) (*TerragruntParsingContext, error) {
+func NewParsingContextWithConfigPath(ctx context.Context, log log.Logger, terragruntConfigPath string) (*TerragruntParsingContext, error) {
 	opt, err := options.NewTerragruntOptionsWithConfigPath(terragruntConfigPath)
 	if err != nil {
 		return nil, err
 	}
 	opt.OriginalTerragruntConfigPath = terragruntConfigPath
 	opt.Env = getEnvs()
-	opt.Logger.SetOptions(log.WithLevel(log.ErrorLevel))
 
-	parsingContext := config.NewParsingContext(ctx, opt)
+	parsingContext := config.NewParsingContext(ctx, log, opt)
 
 	terragruntParsingContext := TerragruntParsingContext{
 		Context:        ctx,
@@ -67,9 +67,9 @@ func NewParsingContextWithConfigPath(ctx context.Context, terragruntConfigPath s
 	return &terragruntParsingContext, nil
 }
 
-func NewParsingContextWithDecodeList(ctx *TerragruntParsingContext) *TerragruntParsingContext {
+func NewParsingContextWithDecodeList(ctx *TerragruntParsingContext, log log.Logger) *TerragruntParsingContext {
 	// Parse the HCL file
-	parseCtx := config.NewParsingContext(ctx.ParsingContext, ctx.ParsingContext.TerragruntOptions).
+	parseCtx := config.NewParsingContext(ctx.ParsingContext, log, ctx.ParsingContext.TerragruntOptions).
 		WithDecodeList(
 			config.DependencyBlock,
 			config.TerraformBlock,
@@ -99,8 +99,8 @@ func (ctx TerragruntParsingContext) WithTerragruntOptions(opts *options.Terragru
 	return &ctx
 }
 
-func (ctx TerragruntParsingContext) PartialParseConfigFile(path string) (*IntegrationTerragruntConfig, error) {
-	parseConfig, err := config.PartialParseConfigFile(ctx.ParsingContext, path, nil)
+func (ctx TerragruntParsingContext) PartialParseConfigFile(log log.Logger, path string) (*IntegrationTerragruntConfig, error) {
+	parseConfig, err := config.PartialParseConfigFile(ctx.ParsingContext, log, path, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -110,13 +110,12 @@ func (ctx TerragruntParsingContext) PartialParseConfigFile(path string) (*Integr
 	return &terragruntIntegrationConfig, nil
 }
 
-func (ctx TerragruntParsingContext) WithDependencyPath(path string) *TerragruntParsingContext {
+func (ctx TerragruntParsingContext) WithDependencyPath(path string, log log.Logger) *TerragruntParsingContext {
 	terrOpts, _ := options.NewTerragruntOptionsWithConfigPath(path)
 	terrOpts.OriginalTerragruntConfigPath = ctx.ParsingContext.TerragruntOptions.OriginalTerragruntConfigPath
 	terrOpts.Env = ctx.ParsingContext.TerragruntOptions.Env
-	terrOpts.Logger.SetOptions(log.WithLevel(log.ErrorLevel))
 
-	terrContext := config.NewParsingContext(ctx, terrOpts)
+	terrContext := config.NewParsingContext(ctx, log, terrOpts)
 
 	terragruntParsingContext := TerragruntParsingContext{
 		Context:        ctx.Context,
@@ -127,7 +126,7 @@ func (ctx TerragruntParsingContext) WithDependencyPath(path string) *TerragruntP
 }
 
 // DecodeBaseBlocks Decode just the Base blocks. See the function docs for DecodeBaseBlocks for more info on what base blocks are.
-func (ctx TerragruntParsingContext) DecodeBaseBlocks(path string, includeFromChild *config.IncludeConfig) (*config.DecodedBaseBlocks, error) {
+func (ctx TerragruntParsingContext) DecodeBaseBlocks(log log.Logger, path string, includeFromChild *config.IncludeConfig) (*config.DecodedBaseBlocks, error) {
 	parsingContext := ctx.ParsingContext.
 		WithDecodeList(config.DependencyBlock, config.DependenciesBlock, config.TerraformBlock)
 
@@ -135,7 +134,7 @@ func (ctx TerragruntParsingContext) DecodeBaseBlocks(path string, includeFromChi
 	if err != nil {
 		return nil, err
 	}
-	return config.DecodeBaseBlocks(parsingContext, file, includeFromChild)
+	return config.DecodeBaseBlocks(parsingContext, log, file, includeFromChild)
 }
 
 // FindConfigFilesInPath returns a list of all Terragrunt config files in the given path or any subfolder of the path. A file is a Terragrunt
@@ -156,7 +155,7 @@ func FindConfigFilesInPath(rootPath string, opts *options.TerragruntOptions) ([]
 
 		for _, configFile := range []string{"root.hcl"} {
 			if !filepath.IsAbs(configFile) {
-				configFile = util.JoinPath(path, configFile)
+				configFile = filepath.Join(path, configFile)
 			}
 
 			if !util.IsDir(configFile) && util.FileExists(configFile) {
@@ -229,4 +228,4 @@ func getAllTerragruntFiles(path string) ([]string, error) {
 }
 
 //go:linkname createTerragruntEvalContext github.com/gruntwork-io/terragrunt/config.createTerragruntEvalContext
-func createTerragruntEvalContext(ctx *config.ParsingContext, configPath string) (*hcl.EvalContext, error)
+func createTerragruntEvalContext(ctx *config.ParsingContext, l log.Logger, configPath string) (*hcl.EvalContext, error)

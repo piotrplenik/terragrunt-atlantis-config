@@ -48,14 +48,14 @@ Then, make sure `terragrunt-atlantis-config` is present on your Atlantis server.
 
 ```hcl
 variable "terragrunt_atlantis_config_version" {
-  default = "2.22.2"
+  default = "2.23.0"
 }
 
 build {
   // ...
   provisioner "shell" {
     inline = [
-      "wget https://github.com/transcend-io/terragrunt-atlantis-config/releases/download/v${var.terragrunt_atlantis_config_version}/terragrunt-atlantis-config_${var.terragrunt_atlantis_config_version}_linux_amd64.tar.gz",
+      "wget https://github.com/piotrplenik/terragrunt-atlantis-config/releases/download/v${var.terragrunt_atlantis_config_version}/terragrunt-atlantis-config_${var.terragrunt_atlantis_config_version}_linux_amd64.tar.gz",
       "sudo tar xf terragrunt-atlantis-config_${var.terragrunt_atlantis_config_version}_linux_amd64.tar.gz",
       "sudo mv terragrunt-atlantis-config_${var.terragrunt_atlantis_config_version}_linux_amd64/terragrunt-atlantis-config_${var.terragrunt_atlantis_config_version}_linux_amd64 terragrunt-atlantis-config",
       "sudo install terragrunt-atlantis-config /usr/local/bin",
@@ -156,7 +156,7 @@ Another way to customize the output is to use `locals` values in your terragrunt
 | `atlantis_terraform_version`  | Allows overriding the `--terraform-version` flag for a single module                                                                                           | string       |
 | `atlantis_autoplan`           | Allows overriding the `--autoplan` flag for a single module                                                                                                    | bool         |
 | `atlantis_skip`               | If true on a child module, that module will not appear in the output.<br>If true on a parent module, none of that parent's children will appear in the output. | bool         |
-| `extra_atlantis_dependencies` | See [Extra dependencies](https://github.com/transcend-io/terragrunt-atlantis-config#extra-dependencies)                                                        | list(string) |
+| `extra_atlantis_dependencies` | See [Extra dependencies](https://github.com/piotrplenik/terragrunt-atlantis-config#extra-dependencies)                                                        | list(string) |
 | `atlantis_project`            | Create Atlantis project for a project hcl file. Only functional with `--project-hcl-files` and `--use-project-markers` | bool         |
 
 ## Separate workspace for parallel plan and apply
@@ -192,7 +192,7 @@ You can install this tool locally to checkout what kinds of config it will gener
 Recommended: Install any version via go install:
 
 ```bash
-go install github.com/transcend-io/terragrunt-atlantis-config@v1.17.9
+go install github.com/piotrplenik/terragrunt-atlantis-config@v1.17.9
 ```
 
 This module officially supports golang version v1.21, tested on Github with each build. 
