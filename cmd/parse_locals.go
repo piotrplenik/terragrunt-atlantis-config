@@ -6,12 +6,14 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/gruntwork-io/go-commons/errors"
 	deprecatedConfig "github.com/gruntwork-io/terragrunt/config"
 	"github.com/gruntwork-io/terragrunt/config/hclparse"
+	"github.com/gruntwork-io/terragrunt/pkg/log"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/zclconf/go-cty/cty"
-	"path/filepath"
 )
 
 // ResolvedLocals are the parsed result of local values this module cares about
@@ -97,12 +99,12 @@ func mergeResolvedLocals(parent ResolvedLocals, child ResolvedLocals) ResolvedLo
 }
 
 // Parses a given file, returning a map of all it's `local` values
-func parseLocals(ctx *TerragruntParsingContext, path string, includeFromChild *deprecatedConfig.IncludeConfig) (ResolvedLocals, error) {
+func parseLocals(ctx *TerragruntParsingContext, log log.Logger, path string, includeFromChild *deprecatedConfig.IncludeConfig) (ResolvedLocals, error) {
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(ctx.ParsingContext.TerragruntOptions.WorkingDir, path)
 	}
 	// Decode just the Base blocks. See the function docs for DecodeBaseBlocks for more info on what base blocks are.
-	baseBlocks, err := ctx.DecodeBaseBlocks(path, includeFromChild)
+	baseBlocks, err := ctx.DecodeBaseBlocks(log, path, includeFromChild)
 	if err != nil {
 		return ResolvedLocals{}, err
 	}
@@ -111,7 +113,7 @@ func parseLocals(ctx *TerragruntParsingContext, path string, includeFromChild *d
 	mergedParentLocals := ResolvedLocals{}
 	if baseBlocks.TrackInclude != nil && includeFromChild == nil {
 		for _, includeConfig := range baseBlocks.TrackInclude.CurrentList {
-			parentLocals, _ := parseLocals(ctx, includeConfig.Path, &includeConfig)
+			parentLocals, _ := parseLocals(ctx, log, includeConfig.Path, &includeConfig)
 			mergedParentLocals = mergeResolvedLocals(mergedParentLocals, parentLocals)
 		}
 	}
