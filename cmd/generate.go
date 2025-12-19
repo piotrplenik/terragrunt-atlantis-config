@@ -547,7 +547,7 @@ func createHclProject(ctx context.Context, log log.Logger, sourcePaths []string,
 }
 
 // Finds the absolute paths of all arbitrary project hcl files
-func getAllTerragruntProjectHclFiles(ctx context.Context, log log.Logger) map[string][]string {
+func getAllTerragruntProjectHclFiles(log log.Logger) map[string][]string {
 	projectHclFiles := projectHclFiles
 	orderedHclFilePaths := map[string][]string{}
 	uniqueHclFileAbsPaths := map[string][]string{}
@@ -580,7 +580,7 @@ func getAllTerragruntProjectHclFiles(ctx context.Context, log log.Logger) map[st
 	return uniqueHclFileAbsPaths
 }
 
-func main(ctx context.Context, log log.Logger, cmd *cobra.Command, args []string) error {
+func main(ctx context.Context, log log.Logger) error {
 	// Ensure the gitRoot has a trailing slash and is an absolute path
 	absoluteGitRoot, err := filepath.Abs(gitRoot)
 	if err != nil {
@@ -593,7 +593,7 @@ func main(ctx context.Context, log log.Logger, cmd *cobra.Command, args []string
 	if len(projectHclFiles) > 0 {
 		workingDirs = nil
 		// map [project-hcl-file] => directories containing project-hcl-file
-		projectHclDirMap = getAllTerragruntProjectHclFiles(ctx, log)
+		projectHclDirMap = getAllTerragruntProjectHclFiles(log)
 		for _, projectHclFile := range projectHclFiles {
 			projectHclDirs = append(projectHclDirs, projectHclDirMap[projectHclFile]...)
 			workingDirs = append(workingDirs, projectHclDirMap[projectHclFile]...)
@@ -604,7 +604,7 @@ func main(ctx context.Context, log log.Logger, cmd *cobra.Command, args []string
 		}
 	}
 	// Read in the old config, if it already exists
-	oldConfig, err := readOldConfig()
+	oldConfig, err := readOldConfig(log)
 	if err != nil {
 		return err
 	}
@@ -817,8 +817,13 @@ func main(ctx context.Context, log log.Logger, cmd *cobra.Command, args []string
 
 	// Write output
 	if len(outputPath) != 0 {
-		os.WriteFile(outputPath, []byte(yamlString), 0644)
+		err := os.WriteFile(outputPath, []byte(yamlString), 0644)
+		if err != nil {
+			log.Error("Error writing to file ", outputPath, ": ", err)
+			return err
+		}
 	} else {
+		log.Info("Generated Atlantis config:")
 		log.Println(yamlString)
 	}
 
@@ -859,7 +864,11 @@ var generateCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		dependsOn, _ := cmd.Flags().GetBool("depends-on")
 		if dependsOn {
-			cmd.MarkFlagRequired("create-project-name")
+			err := cmd.MarkFlagRequired("create-project-name")
+			if err != nil {
+				l := log.New()
+				l.Error("Error marking --create-project-name as required when --depends-on is set: %s", err)
+			}
 		}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -871,7 +880,7 @@ var generateCmd = &cobra.Command{
 			log.WithLevel(options.DefaultLogLevel),
 			log.WithFormatter(format.NewFormatter(format.NewPrettyFormatPlaceholders())),
 		)
-		return main(ctx, l, cmd, args)
+		return main(ctx, l)
 	},
 }
 
@@ -923,7 +932,10 @@ func init() {
 // Runs a set of arguments, returning the output
 func RunWithFlags(filename string, args []string) ([]byte, error) {
 	rootCmd.SetArgs(args)
-	rootCmd.Execute()
+	err := rootCmd.Execute()
+	if err != nil {
+		return nil, err
+	}
 
 	return os.ReadFile(filename)
 }

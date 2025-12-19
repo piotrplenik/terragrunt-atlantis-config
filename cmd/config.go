@@ -3,9 +3,8 @@ package cmd
 import (
 	"os"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/ghodss/yaml"
+	"github.com/gruntwork-io/terragrunt/pkg/log"
 )
 
 // Represents an entire config file
@@ -71,7 +70,7 @@ type AutoplanConfig struct {
 
 // Checks if an output file already exists. If it does, it reads it
 // in to preserve some parts of the old config
-func readOldConfig() (*AtlantisConfig, error) {
+func readOldConfig(log log.Logger) (*AtlantisConfig, error) {
 	// The old file not existing is not an error, as it should not exist on the very first run
 	bytes, err := os.ReadFile(outputPath)
 	if err != nil {
