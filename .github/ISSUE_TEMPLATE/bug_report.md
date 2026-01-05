@@ -1,36 +1,88 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
+name: Bug Report
+about: You're experiencing an issue that is different than the documented behavior.
+labels: bug
+---
+
+<!--- Please keep this note for the community --->
+
+### Community Note
+
+* Please vote on this issue by adding a 👍 [reaction](https://blog.github.com/2016-03-10-add-reactions-to-pull-requests-issues-and-comments/) to the original issue to help the community and maintainers prioritize this request. Searching for pre-existing feature requests helps us consolidate datapoints for identical requirements into a single place, thank you!
+* Please do not leave "+1" or other comments that do not add relevant new information or questions, they generate extra noise for issue followers and do not help prioritize the request.
+* If you are interested in working on this issue or have submitted a pull request, please leave a comment.
+
+<!--- Thank you for keeping this note for the community --->
 
 ---
-## Bug report
 
-Summarize what you were trying to do when the issue appeared.
+<!---
+When filing a bug, please include the following headings if possible.
+Any example text in this template can be deleted.
+--->
 
-**To Reproduce**
+### Overview of the Issue
 
-Summarize how to reproduce the behavior. For example:
-1. Make a terragrunt file that calls the function `foo`
-2. Run the command `terragrunt-atlantis-config --example`
+<!---
+Please describe the issue you are having and how you encountered the problem.
+--->
 
-**Expected behavior**
 
-No error. I expected the generated Atlantis config to look like:
+### Reproduction Steps
+
+<!---
+In order to effectively and quickly resolve the issue, please provide exact steps that allow us the reproduce the problem. If no steps are provided, then it will likely take longer to get the issue resolved.
+--->
+
+
+### Logs
+
+<!---
+Provide log files from Atlantis server
+
+logs can be retrieved from the deployment or from atlantis comments by adding `--debug` such as `atlantis plan --debug`
+
+<details>
+  <summary>Logs</summary>
+
 ```
-example good config
+log output
 ```
 
-**Actual behavior**
+</details>
+--->
 
-Describe what happened and why it had a negative impact.
+
+### Environment details
+
+<!---
+If not already included, please provide the following:
+
+- Atlantis version:
+- Deployment method: ecs/eks/helm/tf module
+- If not running the latest Atlantis version have you tried to reproduce this issue on the latest version:
+- Atlantis flags:
+
+Atlantis server-side config file:
+
+```yaml
+# config file
 ```
-example bad config or error
+
+Repo `atlantis.yaml` file:
+
+```yaml
+# config file
 ```
 
-**Relevant Terragrunt files**
+Any other information you can provide about the environment/deployment (efs/nfs, aws/gcp, k8s/fargate, etc)
+--->
 
-Please provide at least a snippet of relevant terragrunt code that is causing terragrunt-atlantis-config to fail.
-Ideally, a link to a repository with the smallest set of code needed to reproduce the issue.
+
+### Additional Context
+
+<!---
+Additional context on the problem. Docs, links to blogs, or other material that lead you to discover this issue or were helpful in troubleshooting the issue.
+
+Use a bulleted list to link to tickets
+--->

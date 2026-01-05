@@ -1,30 +1,48 @@
-<p align="center">
-  <img alt="Terragrunt Atlantis Config by Transcend" src="https://user-images.githubusercontent.com/7354176/78756035-f9863480-792e-11ea-96d3-d4ffe50e0269.png"/>
-</p>
-<h1 align="center">Terragrunt Atlantis Config</h1>
-<p align="center">
-  <strong>Generate Atlantis Config for Terragrunt projects.</strong>
-</p>
-<br />
+# Atlantis Config for Terragrunt Projects.
 
 ## What is this?
 
-[Atlantis](https://runatlantis.io) is an awesome tool for Terraform pull request automation. Each repo can have a YAML config file that defines Terraform module dependencies, so that PRs that affect dependent modules will automatically generate `terraform plan`s for those modules.
+[Atlantis](https://www.runatlantis.io) is a powerful tool for Terraform pull request automation that enables teams to collaborate on infrastructure changes through pull requests. It runs `terraform plan` and `terraform apply` directly from pull requests, providing visibility and control over infrastructure changes. Each repository can have a YAML configuration file ([`atlantis.yaml`](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html)) that defines Terraform module dependencies, workflows, and automation rules.
 
-[Terragrunt](https://terragrunt.gruntwork.io) is a Terraform wrapper, which has the concept of dependencies built into its configuration.
+[Terragrunt](https://terragrunt.gruntwork.io) is a thin wrapper for Terraform that provides extra tools for keeping your configurations DRY, working with multiple Terraform modules, and managing remote state. Terragrunt has built-in support for defining dependencies between modules.
 
-This tool creates Atlantis YAML configurations for Terragrunt projects by:
+**The Challenge:** While Atlantis excels at automating Terraform workflows and Terragrunt excels at managing complex Terraform configurations, manually creating and maintaining an `atlantis.yaml` file for large Terragrunt projects with hundreds of interdependent modules is tedious and error-prone.
 
-- Finding all `terragrunt.hcl` in a repo
-- Evaluating their `dependency`, `terraform`, `locals`, and other source blocks to find their dependencies
-- Creating a Directed Acyclic Graph of all dependencies
-- Constructing and logging YAML in Atlantis' config spec that reflects the graph
+**The Solution:** `terragrunt-atlantis-config` automatically generates Atlantis configurations for Terragrunt projects by:
 
-This is especially useful for organizations that use monorepos for their Terragrunt config (as we do at Transcend), and have thousands of lines of config.
+- Finding all `terragrunt.hcl`, `terragrunt.stack.hcl` and `terragrunt.hcl.json` files in a repository
+- Evaluating their `dependency`, `dependencies`, `terraform`, `locals`, and other blocks to discover module relationships
+- Building a Directed Acyclic Graph (DAG) of all dependencies
+- Generating a complete [`atlantis.yaml`](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html) file that reflects the dependency graph
+
+This automation is especially valuable for organizations using monorepos for their Terragrunt configurations, where manually maintaining dependency information across hundreds or thousands of modules would be impractical.
+
+### Key Benefits
+
+- **Automatic Dependency Detection**: Leverages Atlantis' [project dependencies](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#project-dependencies) feature to ensure dependent modules are planned when their dependencies change
+- **Workflow Automation**: Integrates with Atlantis [custom workflows](https://www.runatlantis.io/docs/custom-workflows.html) and [autoplanning](https://www.runatlantis.io/docs/autoplanning.html)
+- **Parallel Execution**: Supports Atlantis' [parallel plan/apply](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#parallel-plan-and-apply) using separate workspaces
+- **Zero Manual Maintenance**: Configuration updates automatically as you modify your Terragrunt modules
+
+## Prerequisites
+
+Before using this tool, ensure you have:
+
+1. **Atlantis Server**: A running Atlantis instance (see [Atlantis Installation Guide](https://www.runatlantis.io/docs/installation-guide.html))
+2. **Terragrunt Project**: A repository with Terragrunt configurations
+3. **Understanding of Atlantis Concepts**:
+   - [Repo-level atlantis.yaml](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html) - The configuration file this tool generates
+   - [Server-side repo config](https://www.runatlantis.io/docs/server-side-repo-config.html) - Where you'll configure pre-workflow hooks
+   - [Workflows](https://www.runatlantis.io/docs/custom-workflows.html) - Custom sequences of commands Atlantis runs
+   - [Autoplanning](https://www.runatlantis.io/docs/autoplanning.html) - Automatic terraform plan on PR changes
 
 ## Integrate into your Atlantis Server
 
-The recommended way to use this tool is to install it onto your Atlantis server, and then use a [Pre-Workflow hook](https://www.runatlantis.io/docs/pre-workflow-hooks.html#pre-workflow-hooks) to run it after every clone. This way, Atlantis can automatically determine what modules should be planned/applied for any change to your repository.
+The recommended way to use this tool is to install it onto your Atlantis server, and then use a [Pre-Workflow Hook](https://www.runatlantis.io/docs/pre-workflow-hooks.html) to run it after every repository clone. This way, Atlantis can automatically generate the configuration and determine what modules should be planned/applied for any change to your repository.
+
+Pre-workflow hooks run before Atlantis workflows execute, making them ideal for dynamic configuration generation. They're defined in the [server-side repo config](https://www.runatlantis.io/docs/server-side-repo-config.html), which is separate from the repo-level `atlantis.yaml` that this tool generates.
+
+### Step 1: Configure the Pre-Workflow Hook
 
 To get started, add a `pre_workflow_hooks` field to your `repos` section of your [server-side repo config](https://www.runatlantis.io/docs/server-side-repo-config.html#do-i-need-a-server-side-repo-config-file):
 
@@ -43,6 +61,16 @@ To get started, add a `pre_workflow_hooks` field to your `repos` section of your
   ]
 }
 ```
+
+**Common flags explained:**
+- `--autoplan`: Enables [autoplanning](https://www.runatlantis.io/docs/autoplanning.html) - Atlantis automatically runs `plan` when PRs are opened/updated
+- `--parallel`: Enables parallel [plan and apply](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#parallel-plan-and-apply) operations
+- `--create-workspace`: Creates separate [workspaces](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#workspace) for each project to enable parallelism
+- `--output`: Specifies where to write the generated `atlantis.yaml` file
+
+Learn more about available flags in the [All Flags](#all-flags) section below.
+
+### Step 2: Install terragrunt-atlantis-config on Your Server
 
 Then, make sure `terragrunt-atlantis-config` is present on your Atlantis server. There are many different ways to configure a server, but this example in [Packer](https://www.packer.io/) should show the bash commands you'll need just about anywhere:
 
@@ -66,19 +94,46 @@ build {
 }
 ```
 
-and just like that, your developers should never have to worry about an `atlantis.yaml` file, or even need to know what it is.
+**Alternative installation methods:**
+- **Docker**: Include the binary in your Atlantis Docker image (see [Atlantis Docker documentation](https://www.runatlantis.io/docs/deployment.html#docker))
+- **Kubernetes**: Add as an init container or include in your Atlantis pod image (see [Atlantis Kubernetes Guide](https://www.runatlantis.io/docs/deployment.html#kubernetes))
+- **Binary releases**: Download from [GitHub Releases](https://github.com/piotrplenik/terragrunt-atlantis-config/releases)
+
+Once configured, your developers will never need to worry about maintaining an `atlantis.yaml` file manually—it will be generated automatically on each Atlantis run.
+
+## How It Works
+
+When Atlantis receives a pull request:
+
+1. **Clone**: Atlantis clones your repository (standard [Atlantis behavior](https://www.runatlantis.io/docs/how-atlantis-works.html))
+2. **Pre-Workflow Hook**: The hook runs `terragrunt-atlantis-config generate`, which:
+   - Scans your repository for all `terragrunt.hcl` files
+   - Parses dependencies from `dependency` and `dependencies` blocks
+   - Evaluates `locals` blocks for custom configurations
+   - Builds a dependency graph
+   - Generates an `atlantis.yaml` with proper [project configurations](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#projects)
+3. **Planning**: Atlantis uses the generated config to determine which projects to plan (see [Autoplanning](https://www.runatlantis.io/docs/autoplanning.html))
+4. **Apply**: When you comment `atlantis apply`, Atlantis respects the dependency order defined in the generated config
+
+This workflow ensures that:
+- Dependencies are always up-to-date
+- Module changes trigger plans for dependent modules
+- Apply operations respect dependency order
+- You can leverage [apply requirements](https://www.runatlantis.io/docs/apply-requirements.html) for safety
 
 ## Extra dependencies
 
-For basic cases, this tool can sniff out all dependencies in a module. However, you may have times when you want to add in additional dependencies such as:
+For basic cases, this tool automatically detects all module dependencies from your Terragrunt configuration. However, you may need additional dependencies for advanced scenarios:
 
-- You use Terragrunt's `read_terragrunt_config` function in your locals, and want to depend on the read file
-- Your Terragrunt module should be run anytime some non-terragrunt file is updated, such as a Dockerfile or Packer template
-- You want to run _all_ modules any time your product has a major version bump
-- You believe a module should be reapplied any time some other file or directory is updated
+**Common use cases:**
+- You use Terragrunt's `read_terragrunt_config` function in your locals and want to depend on the read file
+- Your Terragrunt module should trigger a plan when non-Terragrunt files change (e.g., Dockerfiles, Packer templates, scripts)
+- You want to run _all_ modules when certain critical files change (e.g., major version bumps)
+- You need custom file watching beyond the [default autoplan behavior](https://www.runatlantis.io/docs/autoplanning.html#customizing-when-modified)
 
-In these cases, you can customize the `locals` block in that Terragrunt module to have a field named `extra_atlantis_dependencies` with a list
-of values you want included in the config, such as:
+### Configuration
+
+Add an `extra_atlantis_dependencies` field to the `locals` block in your `terragrunt.hcl`:
 
 ```hcl
 locals {
@@ -89,7 +144,7 @@ locals {
 }
 ```
 
-In your `atlantis.yaml` file, you will end up seeing output like:
+This will be reflected in the generated `atlantis.yaml` in the [`when_modified`](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#when_modified) section:
 
 ```yaml
 - autoplan:
@@ -102,15 +157,21 @@ In your `atlantis.yaml` file, you will end up seeing output like:
   dir: example-setup/extra_dependency
 ```
 
+### Merging Parent and Child Dependencies
+
 If you specify `extra_atlantis_dependencies` in the parent Terragrunt module, they will be merged with the child dependencies using the following rules:
 
-1. Any function in a parent will be evaluated from the child's directory. So you can use `get_parent_terragrunt_dir()` and other functions like you normally would in terragrunt.
-2. Absolute paths will work as they would in a child module, and the path in the output will be relative from the child module to the absolute path
-3. Relative paths, like the string `"foo.json"`, will be evaluated as relative to the Child module. This means that if you need something relative to the parent module, you should use something like `"${get_parent_terragrunt_dir()}/foo.json"`
+1. **Functions**: Any function in a parent will be evaluated from the child's directory. You can use `get_parent_terragrunt_dir()` and other [Terragrunt built-in functions](https://terragrunt.gruntwork.io/docs/reference/built-in-functions/) as you normally would
+2. **Absolute paths**: Work as they would in a child module; the output path will be relative from the child module to the absolute path
+3. **Relative paths**: Evaluated relative to the _child_ module. For paths relative to the parent module, use `"${get_parent_terragrunt_dir()}/foo.json"`
+
+This merging behavior gives you flexibility to define common dependencies at the parent level while allowing child modules to add their own specific dependencies. Learn more about [Terragrunt configuration inheritance](https://terragrunt.gruntwork.io/docs/features/keep-your-terragrunt-architecture-dry/#dry-common-terragrunt-configuration).
 
 ## All Flags
 
 One way to customize the behavior of this module is through CLI flag values passed in at runtime. These settings will apply to all modules.
+
+Many of these flags directly correspond to [Atlantis repo-level configuration options](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html). Understanding the Atlantis configuration model will help you use these flags effectively.
 
 | Flag Name                    | Description                                                                                                                                                                     | Default Value     |
 |------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------|
@@ -133,6 +194,11 @@ One way to customize the behavior of this module is through CLI flag values pass
 | `--num-executors`            | Number of executors used for parallel generation of projects. Default is 15                                                                                                     | 15                |
 | `--execution-order-groups`   | Computes execution_order_group for projects                                                                                                                                     | false             |
 | `--depends-on`               | Computes depends_on for projects. Project names are required.                                                                                                                   | false             |
+
+**Key flags for Atlantis integration:**
+- Use `--apply-requirements` to enforce [apply requirements](https://www.runatlantis.io/docs/apply-requirements.html) like PR approval before applying changes
+- Use `--workflow` to specify a [custom workflow](https://www.runatlantis.io/docs/custom-workflows.html) defined in your server-side config
+- Combine `--parallel` and `--create-workspace` to enable [parallel operations](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#parallel-plan-and-apply)
 
 ## Project generation
 
@@ -161,21 +227,24 @@ Another way to customize the output is to use `locals` values in your terragrunt
 
 ## Separate workspace for parallel plan and apply
 
-Atlantis added support for running plan and apply parallel in [v0.13.0](https://github.com/runatlantis/atlantis/releases/tag/v0.13.0).
+Atlantis added support for running plan and apply in parallel in [v0.13.0](https://github.com/runatlantis/atlantis/releases/tag/v0.13.0). This feature allows multiple Terraform operations to run simultaneously, significantly speeding up large infrastructure changes.
 
-To use this feature, projects have to be separated in different workspaces, and the `create-workspace` flag enables this by concatenating the project path as the
-name of the workspace.
+To use this feature, projects must be separated into different [workspaces](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#workspace). The `--create-workspace` flag enables this by concatenating the project path as the workspace name.
 
-As an example, project `${git_root}/stage/app/terragrunt.hcl` will have the name `stage_app` as workspace name. This flag should be used along with `parallel` to enable parallel plan and apply:
+**Example:** Project `${git_root}/stage/app/terragrunt.hcl` will have `stage_app` as its workspace name.
+
+This flag should be used together with `--parallel` to enable [parallel plan and apply](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#parallel-plan-and-apply):
 
 ```bash
 terragrunt-atlantis-config generate --output atlantis.yaml --parallel --create-workspace
 ```
 
-Enabling this feature may consume more resources like cpu, memory, network, and disk, as each workspace will now be cloned separately by atlantis.
+**Important considerations:**
+- Enabling this feature may consume more resources (CPU, memory, network, disk) as each workspace will be cloned separately by Atlantis
+- When running commands on specific directories, include the workspace: `atlantis plan/apply -d ${git_root}/stage/app -w stage_app`
+- Alternatively, if you enable `--create-project-name`, you can use project-based commands: `atlantis plan/apply -p stage_app`
 
-As when defining the workspace this info is also needed when running `atlantis plan/apply -d ${git_root}/stage/app -w stage_app` to run the command on specific directory,
-you can also use the `atlantis plan/apply -p stage_app` in case you have enabled the `create-project-name` cli argument (it is `false` by default).
+Learn more about [Atlantis workspaces](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#workspace) and how they relate to [Terraform workspaces](https://www.runatlantis.io/docs/terraform-workspaces.html).
 
 ## Rules for merging config
 
@@ -187,7 +256,11 @@ However, there is one exception where the values are merged, which is the `atlan
 
 ## Local Installation and Usage
 
-You can install this tool locally to checkout what kinds of config it will generate for your repo, though in production it is recommended to [install this tool directly onto your Atlantis server](##integrate-into-your-atlantis-server)
+You can install this tool locally to preview the Atlantis configuration it will generate for your repository. This is useful for testing and debugging before deploying to production.
+
+**Note:** In production, it's recommended to [install this tool directly on your Atlantis server](#integrate-into-your-atlantis-server) and use pre-workflow hooks.
+
+### Installation
 
 Recommended: Install any version via go install:
 
@@ -212,6 +285,39 @@ terragrunt-atlantis-config generate --autoplan --output ./atlantis.yaml
 ```
 
 Finally, check the log output (or your output file) for the YAML.
+
+## Further Reading
+
+To get the most out of this tool and Atlantis, we recommend reviewing the following Atlantis documentation:
+
+### Essential Atlantis Documentation
+
+- **[How Atlantis Works](https://www.runatlantis.io/docs/how-atlantis-works.html)** - Understanding the Atlantis workflow and lifecycle
+- **[Repo-Level atlantis.yaml](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html)** - Complete reference for the configuration file this tool generates
+- **[Server-Side Repo Config](https://www.runatlantis.io/docs/server-side-repo-config.html)** - Where to configure pre-workflow hooks and global settings
+- **[Custom Workflows](https://www.runatlantis.io/docs/custom-workflows.html)** - Customize the commands Atlantis runs for plan/apply
+- **[Pre-Workflow Hooks](https://www.runatlantis.io/docs/pre-workflow-hooks.html)** - Run commands before workflows (where this tool runs)
+
+### Advanced Topics
+
+- **[Autoplanning](https://www.runatlantis.io/docs/autoplanning.html)** - Automatic planning on PR changes
+- **[Apply Requirements](https://www.runatlantis.io/docs/apply-requirements.html)** - Require approvals, mergeable status, etc. before applying
+- **[Parallel Plans and Applies](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#parallel-plan-and-apply)** - Run multiple operations simultaneously
+- **[Project Dependencies](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#project-dependencies)** - Define module dependencies (automatically generated by this tool)
+- **[Terraform Workspaces](https://www.runatlantis.io/docs/terraform-workspaces.html)** - Using Terraform workspaces with Atlantis
+
+### Deployment & Security
+
+- **[Installation Guide](https://www.runatlantis.io/docs/installation-guide.html)** - Set up your Atlantis server
+- **[Deployment](https://www.runatlantis.io/docs/deployment.html)** - Deploy Atlantis with Docker, Kubernetes, or other platforms
+- **[Security](https://www.runatlantis.io/docs/security.html)** - Best practices for securing your Atlantis installation
+- **[Webhook Secrets](https://www.runatlantis.io/docs/webhook-secrets.html)** - Secure your webhooks from unauthorized requests
+
+### Troubleshooting & Support
+
+- **[FAQ](https://www.runatlantis.io/docs/faq.html)** - Frequently asked questions
+- **[Troubleshooting](https://www.runatlantis.io/docs/troubleshooting.html)** - Common issues and solutions
+- **[Atlantis Community](https://www.runatlantis.io/community.html)** - Get help from the community
 
 ## Contributing
 
