@@ -5,7 +5,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
   dir: inherit_from_parent
@@ -13,7 +13,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
   dir: override_parent
@@ -21,7 +21,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: use_flag_default
   terraform_version: 0.14.9001

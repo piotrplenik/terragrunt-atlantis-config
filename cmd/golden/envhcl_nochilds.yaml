@@ -5,7 +5,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -14,7 +14,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -23,7 +23,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -34,7 +34,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -44,7 +44,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -54,7 +54,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -63,7 +63,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -72,7 +72,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -86,7 +86,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -98,7 +98,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -112,7 +112,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -124,7 +124,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -137,7 +137,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'
@@ -150,7 +150,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - '**/*.hcl'
     - '**/*.tf*'

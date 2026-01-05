@@ -5,7 +5,7 @@ projects:
 - autoplan:
     enabled: true
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../../../../terragrunt.hcl
     - ../network/terragrunt.hcl
@@ -14,7 +14,7 @@ projects:
 - autoplan:
     enabled: true
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../../../../terragrunt.hcl
     - ../../stage/network/terragrunt.hcl
@@ -22,7 +22,7 @@ projects:
 - autoplan:
     enabled: true
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../../../../terragrunt.hcl
     - ../network/terragrunt.hcl
@@ -30,21 +30,21 @@ projects:
 - autoplan:
     enabled: true
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../../../../terragrunt.hcl
   dir: myproject/eu-south-1/stage/network
 - autoplan:
     enabled: true
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../../../terragrunt.hcl
   dir: myproject/global/dns
 - autoplan:
     enabled: true
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../../../terragrunt.hcl
   dir: myproject/global/iam

@@ -375,9 +375,7 @@ func TestPreservingOldWorkflows(t *testing.T) {
 		return
 	}
 
-	if string(content) != string(goldenContents) {
-		t.Errorf("Content did not match golden file.\n\nExpected Content: %s\n\nContent: %s", string(goldenContents), string(content))
-	}
+	assert.Equal(t, string(goldenContents), string(content))
 }
 
 func TestPreservingOldProjects(t *testing.T) {
@@ -396,7 +394,7 @@ func TestPreservingOldProjects(t *testing.T) {
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: someDir
   name: projectFromPreviousRun
@@ -422,9 +420,11 @@ func TestPreservingOldProjects(t *testing.T) {
 		return
 	}
 
-	if string(content) != string(goldenContents) {
-		t.Errorf("Content did not match golden file.\n\nExpected Content: %s\n\nContent: %s", string(goldenContents), string(content))
-	}
+	assert.Equal(t, string(goldenContents), string(content))
+	//
+	//if string(content) != string(goldenContents) {
+	//	t.Errorf("Content did not match golden file.\n\nExpected Content: %s\n\nContent: %s", string(goldenContents), string(content))
+	//}
 }
 
 func TestEnablingAutomerge(t *testing.T) {
@@ -680,5 +680,12 @@ func TestWithDependsOn(t *testing.T) {
 		filepath.Join("..", "test_examples", "chained_dependencies"),
 		"--depends-on",
 		"--create-project-name",
+	})
+}
+
+func TestStack(t *testing.T) {
+	runTest(t, filepath.Join("golden", "stack.yaml"), []string{
+		"--root",
+		filepath.Join("..", "test_examples", "stack"),
 	})
 }

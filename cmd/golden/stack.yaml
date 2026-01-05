@@ -5,14 +5,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - 'terragrunt.hcl'
+    - 'terragrunt.stack.hcl'
     - '*.tf*'
   dir: .
-- autoplan:
-    enabled: false
-    when_modified:
-    - 'terragrunt.hcl'
-    - '*.tf*'
-    - ../terragrunt.hcl
-  dir: child
 version: 3

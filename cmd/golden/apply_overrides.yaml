@@ -7,7 +7,7 @@ projects:
   autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
   dir: child_that_does_not_override
@@ -16,7 +16,7 @@ projects:
   autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
   dir: child_that_overrides
@@ -24,14 +24,14 @@ projects:
   autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
   dir: child_that_overrides_to_empty
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: standalone_module_that_does_not_specify
 - apply_requirements:
@@ -39,14 +39,14 @@ projects:
   autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: standalone_module_that_specifies
 - apply_requirements: []
   autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: standalone_module_that_specifies_empty
 version: 3

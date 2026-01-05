@@ -4,7 +4,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: dependency
   execution_order_group: 0
@@ -12,7 +12,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../dependency/terragrunt.hcl
   depends_on:
@@ -23,7 +23,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../../dependency/terragrunt.hcl
   depends_on:
@@ -34,7 +34,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../depender/terragrunt.hcl
     - ../dependency/terragrunt.hcl

@@ -153,7 +153,7 @@ func FindConfigFilesInPath(rootPath string, opts *options.TerragruntOptions) ([]
 			return nil
 		}
 
-		for _, configFile := range []string{"root.hcl"} {
+		for _, configFile := range []string{"root.hcl", "terragrunt.stack.hcl"} {
 			if !filepath.IsAbs(configFile) {
 				configFile = filepath.Join(path, configFile)
 			}

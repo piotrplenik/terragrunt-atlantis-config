@@ -5,13 +5,13 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - terragrunt.hcl
     - '*.tf*'
   dir: .
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - terragrunt.hcl
     - '*.tf*'
   dir: someDir
   name: projectFromPreviousRun

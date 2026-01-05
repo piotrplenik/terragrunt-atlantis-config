@@ -274,7 +274,7 @@ func getDependencies(ctx *TerragruntParsingContext, log log.Logger, path string)
 			}
 		}
 
-		if filepath.Base(path) == "terragrunt.hcl" {
+		if filepath.Base(path) == "terragrunt.hcl" || filepath.Base(path) == "terragrunt.stack.hcl" {
 			dir := filepath.Dir(path)
 
 			ls, err := parseTerraformLocalModuleSource(dir)
@@ -310,7 +310,7 @@ func createProject(ctx context.Context, log log.Logger, sourcePath string) (*Atl
 	}
 
 	// dependencies being nil is a sign from `getDependencies` that this project should be skipped
-	if dependencies == nil {
+	if dependencies == nil && !strings.HasSuffix(sourcePath, "terragrunt.stack.hcl") {
 		return nil, nil
 	}
 
@@ -326,10 +326,19 @@ func createProject(ctx context.Context, log log.Logger, sourcePath string) (*Atl
 	}
 
 	// All dependencies depend on their own .hcl file, and any tf files in their directory
-	relativeDependencies := []string{
-		"*.hcl",
-		"*.tf*",
+	relativeDependencies := []string{}
+
+	if strings.HasSuffix(sourcePath, "terragrunt.hcl") {
+		relativeDependencies = append(relativeDependencies, "terragrunt.hcl")
+	} else if strings.HasSuffix(sourcePath, "terragrunt.stack.hcl") {
+		relativeDependencies = append(relativeDependencies, "terragrunt.stack.hcl")
+	} else if strings.HasSuffix(sourcePath, "terragrunt.hcl.json") {
+		relativeDependencies = append(relativeDependencies, "terragrunt.hcl.json")
+	} else {
+		panic("Unexpected terragrunt file name: " + sourcePath)
 	}
+
+	relativeDependencies = append(relativeDependencies, "*.tf*")
 
 	// Add other dependencies based on their relative paths. We always want to output with Unix path separators
 	for _, dependencyPath := range dependencies {
@@ -485,7 +494,7 @@ func createHclProject(ctx context.Context, log log.Logger, sourcePaths []string,
 
 		// All dependencies depend on their own .hcl file, and any tf files in their directory
 		relativeDependencies := []string{
-			"*.hcl",
+			"terragrunt.hcl",
 			"*.tf*",
 			"**/*.hcl",
 			"**/*.tf*",
