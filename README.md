@@ -2,39 +2,41 @@
 
 ## What is this?
 
-[Atlantis](https://www.runatlantis.io) is a powerful tool for Terraform pull request automation that enables teams to collaborate on infrastructure changes through pull requests. It runs `terraform plan` and `terraform apply` directly from pull requests, providing visibility and control over infrastructure changes. Each repository can have a YAML configuration file ([`atlantis.yaml`](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html)) that defines Terraform module dependencies, workflows, and automation rules.
+[Atlantis](https://www.runatlantis.io) is a powerful tool for Terraform pull request automation that enables teams to
+collaborate on infrastructure changes through pull requests.
 
-[Terragrunt](https://terragrunt.gruntwork.io) is a thin wrapper for Terraform that provides extra tools for keeping your configurations DRY, working with multiple Terraform modules, and managing remote state. Terragrunt has built-in support for defining dependencies between modules.
+[Terragrunt](https://terragrunt.gruntwork.io) is a thin wrapper around Terraform that helps manage large, multi-module
+configurations. It keeps configurations DRY, manages remote state, and natively supports inter-module dependencies.
 
-**The Challenge:** While Atlantis excels at automating Terraform workflows and Terragrunt excels at managing complex Terraform configurations, manually creating and maintaining an `atlantis.yaml` file for large Terragrunt projects with hundreds of interdependent modules is tedious and error-prone.
+### The Problem
 
-**The Solution:** `terragrunt-atlantis-config` automatically generates Atlantis configurations for Terragrunt projects by:
+In large Terragrunt repositories—especially monorepos—manually creating and maintaining atlantis.yaml becomes tedious
+and error-prone due to the sheer number of modules and dependency relationships.
 
-- Finding all `terragrunt.hcl`, `terragrunt.stack.hcl` and `terragrunt.hcl.json` files in a repository
-- Evaluating their `dependency`, `dependencies`, `terraform`, `locals`, and other blocks to discover module relationships
-- Building a Directed Acyclic Graph (DAG) of all dependencies
-- Generating a complete [`atlantis.yaml`](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html) file that reflects the dependency graph
 
-This automation is especially valuable for organizations using monorepos for their Terragrunt configurations, where manually maintaining dependency information across hundreds or thousands of modules would be impractical.
+### The Solution
+
+`terragrunt-atlantis-config` automatically generates an `atlantis.yaml` for Terragrunt projects by:
+ - Discovering all terragrunt.hcl, terragrunt.stack.hcl, and terragrunt.hcl.json files
+ - Parsing dependency and configuration blocks
+ - Building a dependency DAG
+ - Producing a complete, dependency-aware atlantis.yaml
+
+This makes Atlantis usable at scale for complex Terragrunt setups without manual configuration overhead.
 
 ### Key Benefits
 
-- **Automatic Dependency Detection**: Leverages Atlantis' [project dependencies](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#project-dependencies) feature to ensure dependent modules are planned when their dependencies change
-- **Workflow Automation**: Integrates with Atlantis [custom workflows](https://www.runatlantis.io/docs/custom-workflows.html) and [autoplanning](https://www.runatlantis.io/docs/autoplanning.html)
-- **Parallel Execution**: Supports Atlantis' [parallel plan/apply](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#parallel-plan-and-apply) using separate workspaces
-- **Zero Manual Maintenance**: Configuration updates automatically as you modify your Terragrunt modules
+ - **Automatic Dependencies**: Plans dependent modules automatically using Atlantis [project dependencies](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#project-dependencies)
+ - **Workflow Integration**: Works seamlessly with [custom workflows](https://www.runatlantis.io/docs/custom-workflows.html) and [autoplanning](https://www.runatlantis.io/docs/autoplanning.html)
+- **Parallel Execution**: Enables [parallel plan/apply](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#parallel-plan-and-apply) with isolated workspaces
+- **No Manual Upkeep**: Configuration updates automatically as you modify your Terragrunt modules
 
 ## Prerequisites
 
 Before using this tool, ensure you have:
 
-1. **Atlantis Server**: A running Atlantis instance (see [Atlantis Installation Guide](https://www.runatlantis.io/docs/installation-guide.html))
-2. **Terragrunt Project**: A repository with Terragrunt configurations
-3. **Understanding of Atlantis Concepts**:
-   - [Repo-level atlantis.yaml](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html) - The configuration file this tool generates
-   - [Server-side repo config](https://www.runatlantis.io/docs/server-side-repo-config.html) - Where you'll configure pre-workflow hooks
-   - [Workflows](https://www.runatlantis.io/docs/custom-workflows.html) - Custom sequences of commands Atlantis runs
-   - [Autoplanning](https://www.runatlantis.io/docs/autoplanning.html) - Automatic terraform plan on PR changes
+1. **Atlantis >v0.26.0**: A running Atlantis instance (see [Atlantis Installation Guide](https://www.runatlantis.io/docs/installation-guide.html)) -
+2. **Terragrunt >v0.97.0**: A repository with Terragrunt configurations
 
 ## Integrate into your Atlantis Server
 
@@ -44,22 +46,31 @@ Pre-workflow hooks run before Atlantis workflows execute, making them ideal for 
 
 ### Step 1: Configure the Pre-Workflow Hook
 
-To get started, add a `pre_workflow_hooks` field to your `repos` section of your [server-side repo config](https://www.runatlantis.io/docs/server-side-repo-config.html#do-i-need-a-server-side-repo-config-file):
+To get started, add a `pre_workflow_hooks` field to your `repos` section of your [custom workflow](https://www.runatlantis.io/docs/custom-workflows.html#terragrunt#do-i-need-a-server-side-repo-config-file):
 
-```json
-{
-  "repos": [
-    {
-      "id": "<your_github_repo>",
-      "workflow": "default",
-      "pre_workflow_hooks": [
-        {
-          "run": "terragrunt-atlantis-config generate --output atlantis.yaml --autoplan --parallel --create-workspace"
-        }
-      ]
-    }
-  ]
-}
+```yaml
+---
+repos:
+  - id: /.*/
+    workflow: terragrunt
+    pre_workflow_hooks:
+      - run: terragrunt-atlantis-config generate --output atlantis.yaml --autoplan --parallel --create-workspace --automerge
+workflows:
+  terragrunt:
+    plan:
+      steps:
+        - env:
+            name: TF_IN_AUTOMATION
+            value: 'true'
+        - run: find . -name '.terragrunt-cache' | xargs rm -rf
+        # - run: terragrunt init -reconfigure
+        - run:
+            command: terragrunt plan -input=false -out=$PLANFILE
+            output: hide
+        - run: terragrunt --log-custom-format "%msg" show $PLANFILE
+    apply:
+      steps:
+        - run: terragrunt apply --log-custom-format "%msg" $PLANFILE
 ```
 
 **Common flags explained:**
@@ -72,64 +83,58 @@ Learn more about available flags in the [All Flags](#all-flags) section below.
 
 ### Step 2: Install terragrunt-atlantis-config on Your Server
 
-Then, make sure `terragrunt-atlantis-config` is present on your Atlantis server. There are many different ways to configure a server, but this example in [Packer](https://www.packer.io/) should show the bash commands you'll need just about anywhere:
+Then, make sure `terragrunt-atlantis-config` is present on your Atlantis server.
 
-```hcl
-variable "terragrunt_atlantis_config_version" {
-  default = "2.23.0"
-}
+```bash
+#!/bin/sh
+set -eoux pipefail # terragrunt
+TG_VERSION="0.96.1"
+TG_SHA256_SUM="513eff2f87e2f5ec84369cc0f9d6c6766b43ca765fec4a3ac3598b933dc3218f"
+TG_FILE="${INIT_SHARED_DIR}/terragrunt"
+wget https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64 -O "${TG_FILE}"
+echo "${TG_SHA256_SUM} ${TG_FILE}" | sha256sum -c
+chmod 755 "${TG_FILE}"
+terragrunt -v
 
-build {
-  // ...
-  provisioner "shell" {
-    inline = [
-      "wget https://github.com/piotrplenik/terragrunt-atlantis-config/releases/download/v${var.terragrunt_atlantis_config_version}/terragrunt-atlantis-config_${var.terragrunt_atlantis_config_version}_linux_amd64.tar.gz",
-      "sudo tar xf terragrunt-atlantis-config_${var.terragrunt_atlantis_config_version}_linux_amd64.tar.gz",
-      "sudo mv terragrunt-atlantis-config_${var.terragrunt_atlantis_config_version}_linux_amd64/terragrunt-atlantis-config_${var.terragrunt_atlantis_config_version}_linux_amd64 terragrunt-atlantis-config",
-      "sudo install terragrunt-atlantis-config /usr/local/bin",
-    ]
-    inline_shebang = "/bin/bash -e"
-  }
-  // ...
-}
+# OpenTofu
+TF_VERSION="1.11.2"
+TF_FILE="${INIT_SHARED_DIR}/tofu"
+TF_SHA256_SUM="1bfb425c940098952df7a74e2f67dd318614bbea2767a25de94e46ca5d5b85ec"
+wget https://github.com/opentofu/opentofu/releases/download/v${TF_VERSION}/tofu_${TF_VERSION}_linux_amd64.zip -O "tofu.zip"
+echo "${TF_SHA256_SUM} tofu.zip" | sha256sum -c
+unzip tofu.zip
+mv tofu ${INIT_SHARED_DIR}
+chmod 755 "${TF_FILE}"
+tofu -v
+
+# terragrunt-atlantis-config
+TAC_VERSION="2.23.0"
+TAC_SHA256_SUM="a6e77d2bcb554e470fd3396989f9c17061a7195571a657696885b5c73ac09d4f"
+TAC_FILE="${INIT_SHARED_DIR}/terragrunt-atlantis-config"
+wget "https://github.com/piotrplenik/terragrunt-atlantis-config/releases/download/v${TAC_VERSION}/terragrunt-atlantis-config_${TAC_VERSION}_linux_amd64"
+echo "${TAC_SHA256_SUM} terragrunt-atlantis-config_${TAC_VERSION}_linux_amd64" | sha256sum -c
+cp -fv "terragrunt-atlantis-config_${TAC_VERSION}_linux_amd64" "${TAC_FILE}"
+chmod 755 "${TAC_FILE}"
+terragrunt-atlantis-config version
 ```
 
-**Alternative installation methods:**
-- **Docker**: Include the binary in your Atlantis Docker image (see [Atlantis Docker documentation](https://www.runatlantis.io/docs/deployment.html#docker))
-- **Kubernetes**: Add as an init container or include in your Atlantis pod image (see [Atlantis Kubernetes Guide](https://www.runatlantis.io/docs/deployment.html#kubernetes))
-- **Binary releases**: Download from [GitHub Releases](https://github.com/piotrplenik/terragrunt-atlantis-config/releases)
-
-Once configured, your developers will never need to worry about maintaining an `atlantis.yaml` file manually—it will be generated automatically on each Atlantis run.
+More info (Atlantis Deployment)[https://www.runatlantis.io/docs/deployment.html]
 
 ## How It Works
 
-When Atlantis receives a pull request:
+On each pull request:
 
-1. **Clone**: Atlantis clones your repository (standard [Atlantis behavior](https://www.runatlantis.io/docs/how-atlantis-works.html))
-2. **Pre-Workflow Hook**: The hook runs `terragrunt-atlantis-config generate`, which:
-   - Scans your repository for all `terragrunt.hcl` files
-   - Parses dependencies from `dependency` and `dependencies` blocks
-   - Evaluates `locals` blocks for custom configurations
-   - Builds a dependency graph
-   - Generates an `atlantis.yaml` with proper [project configurations](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#projects)
-3. **Planning**: Atlantis uses the generated config to determine which projects to plan (see [Autoplanning](https://www.runatlantis.io/docs/autoplanning.html))
-4. **Apply**: When you comment `atlantis apply`, Atlantis respects the dependency order defined in the generated config
+1. **Clone**: Atlantis clones the Terragrunt repository.
+2. **Generate Config**: pre-workflow hook runs `terragrunt-atlantis-config generate` to:
+   - Discover Terragrunt modules and dependencies
+   - Build a dependency graph
+   - Generates an `atlantis.yaml`
+3. **Plan**: Atlantis plans affected projects using [autoplanning](https://www.runatlantis.io/docs/autoplanning.html)
+4. **Apply**: Apply `atlantis apply`, executes in dependency order.
 
-This workflow ensures that:
-- Dependencies are always up-to-date
-- Module changes trigger plans for dependent modules
-- Apply operations respect dependency order
-- You can leverage [apply requirements](https://www.runatlantis.io/docs/apply-requirements.html) for safety
+This ensures dependencies stay current, downstream modules are planned automatically, and applies are executed safely in the correct order.
 
 ## Extra dependencies
-
-For basic cases, this tool automatically detects all module dependencies from your Terragrunt configuration. However, you may need additional dependencies for advanced scenarios:
-
-**Common use cases:**
-- You use Terragrunt's `read_terragrunt_config` function in your locals and want to depend on the read file
-- Your Terragrunt module should trigger a plan when non-Terragrunt files change (e.g., Dockerfiles, Packer templates, scripts)
-- You want to run _all_ modules when certain critical files change (e.g., major version bumps)
-- You need custom file watching beyond the [default autoplan behavior](https://www.runatlantis.io/docs/autoplanning.html#customizing-when-modified)
 
 ### Configuration
 
@@ -285,56 +290,3 @@ terragrunt-atlantis-config generate --autoplan --output ./atlantis.yaml
 ```
 
 Finally, check the log output (or your output file) for the YAML.
-
-## Further Reading
-
-To get the most out of this tool and Atlantis, we recommend reviewing the following Atlantis documentation:
-
-### Essential Atlantis Documentation
-
-- **[How Atlantis Works](https://www.runatlantis.io/docs/how-atlantis-works.html)** - Understanding the Atlantis workflow and lifecycle
-- **[Repo-Level atlantis.yaml](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html)** - Complete reference for the configuration file this tool generates
-- **[Server-Side Repo Config](https://www.runatlantis.io/docs/server-side-repo-config.html)** - Where to configure pre-workflow hooks and global settings
-- **[Custom Workflows](https://www.runatlantis.io/docs/custom-workflows.html)** - Customize the commands Atlantis runs for plan/apply
-- **[Pre-Workflow Hooks](https://www.runatlantis.io/docs/pre-workflow-hooks.html)** - Run commands before workflows (where this tool runs)
-
-### Advanced Topics
-
-- **[Autoplanning](https://www.runatlantis.io/docs/autoplanning.html)** - Automatic planning on PR changes
-- **[Apply Requirements](https://www.runatlantis.io/docs/apply-requirements.html)** - Require approvals, mergeable status, etc. before applying
-- **[Parallel Plans and Applies](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#parallel-plan-and-apply)** - Run multiple operations simultaneously
-- **[Project Dependencies](https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#project-dependencies)** - Define module dependencies (automatically generated by this tool)
-- **[Terraform Workspaces](https://www.runatlantis.io/docs/terraform-workspaces.html)** - Using Terraform workspaces with Atlantis
-
-### Deployment & Security
-
-- **[Installation Guide](https://www.runatlantis.io/docs/installation-guide.html)** - Set up your Atlantis server
-- **[Deployment](https://www.runatlantis.io/docs/deployment.html)** - Deploy Atlantis with Docker, Kubernetes, or other platforms
-- **[Security](https://www.runatlantis.io/docs/security.html)** - Best practices for securing your Atlantis installation
-- **[Webhook Secrets](https://www.runatlantis.io/docs/webhook-secrets.html)** - Secure your webhooks from unauthorized requests
-
-### Troubleshooting & Support
-
-- **[FAQ](https://www.runatlantis.io/docs/faq.html)** - Frequently asked questions
-- **[Troubleshooting](https://www.runatlantis.io/docs/troubleshooting.html)** - Common issues and solutions
-- **[Atlantis Community](https://www.runatlantis.io/community.html)** - Get help from the community
-
-## Contributing
-
-To test any changes you've made, run `make gotestsum` (or `make test` for standard golang testing).
-
-When your PR is merged and a tag is created, a Github Actions job to build the new binary, test it, and deploy it's artifacts to Github Releases along with checksums.
-
-You can then open a PR on our homebrew tap similar to https://github.com/transcend-io/homebrew-tap/pull/4, and as soon as that merges your code will be released. Homebrew is not updated for every release, as Github is the primary artifact store.
-
-## Contributors
-
-<img src="./CONTRIBUTORS.svg">
-
-## Stargazers over time
-
-[![Stargazers over time](https://starchart.cc/transcend-io/terragrunt-atlantis-config.svg)](https://starchart.cc/transcend-io/terragrunt-atlantis-config)
-
-## License
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ftranscend-io%2Fterragrunt-atlantis-config.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Ftranscend-io%2Fterragrunt-atlantis-config?ref=badge_large)
