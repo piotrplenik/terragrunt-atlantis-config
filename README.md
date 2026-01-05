@@ -87,7 +87,8 @@ Then, make sure `terragrunt-atlantis-config` is present on your Atlantis server.
 
 ```bash
 #!/bin/sh
-set -eoux pipefail # terragrunt
+set -eoux pipefail
+# Terragrunt
 TG_VERSION="0.96.1"
 TG_SHA256_SUM="513eff2f87e2f5ec84369cc0f9d6c6766b43ca765fec4a3ac3598b933dc3218f"
 TG_FILE="${INIT_SHARED_DIR}/terragrunt"
@@ -118,7 +119,7 @@ chmod 755 "${TAC_FILE}"
 terragrunt-atlantis-config version
 ```
 
-More info (Atlantis Deployment)[https://www.runatlantis.io/docs/deployment.html]
+More info [Atlantis Deployment](https://www.runatlantis.io/docs/deployment.html).
 
 ## How It Works
 
@@ -161,16 +162,6 @@ This will be reflected in the generated `atlantis.yaml` in the [`when_modified`]
       - ../../.gitignore
   dir: example-setup/extra_dependency
 ```
-
-### Merging Parent and Child Dependencies
-
-If you specify `extra_atlantis_dependencies` in the parent Terragrunt module, they will be merged with the child dependencies using the following rules:
-
-1. **Functions**: Any function in a parent will be evaluated from the child's directory. You can use `get_parent_terragrunt_dir()` and other [Terragrunt built-in functions](https://terragrunt.gruntwork.io/docs/reference/built-in-functions/) as you normally would
-2. **Absolute paths**: Work as they would in a child module; the output path will be relative from the child module to the absolute path
-3. **Relative paths**: Evaluated relative to the _child_ module. For paths relative to the parent module, use `"${get_parent_terragrunt_dir()}/foo.json"`
-
-This merging behavior gives you flexibility to define common dependencies at the parent level while allowing child modules to add their own specific dependencies. Learn more about [Terragrunt configuration inheritance](https://terragrunt.gruntwork.io/docs/features/keep-your-terragrunt-architecture-dry/#dry-common-terragrunt-configuration).
 
 ## All Flags
 
