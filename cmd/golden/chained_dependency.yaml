@@ -5,20 +5,20 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: dependency
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../dependency/terragrunt.hcl
   dir: depender
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../depender/terragrunt.hcl
     - ../dependency/terragrunt.hcl
@@ -27,7 +27,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../../dependency/terragrunt.hcl
   dir: depender_on_depender/nested

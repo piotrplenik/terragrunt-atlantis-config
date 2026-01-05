@@ -5,13 +5,13 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: dependency
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: depender
 version: 3

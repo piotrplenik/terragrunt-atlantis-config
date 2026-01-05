@@ -5,7 +5,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../root-module/*.tf*
     - ../terraform-module/*.tf*

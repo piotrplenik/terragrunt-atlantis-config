@@ -5,7 +5,7 @@ projects:
 - autoplan:
     enabled: true
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
   dir: .
 version: 3

@@ -5,7 +5,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
     - ../terraform.tfvars
@@ -17,14 +17,14 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
   dir: no_files_at_all
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
     - ../dev.tfvars
@@ -35,7 +35,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
     - ../terraform.tfvars
@@ -43,7 +43,7 @@ projects:
 - autoplan:
     enabled: false
     when_modified:
-    - '*.hcl'
+    - 'terragrunt.hcl'
     - '*.tf*'
     - ../terragrunt.hcl
     - ../../../../common_vars/apps/consul/sg.tfvars
