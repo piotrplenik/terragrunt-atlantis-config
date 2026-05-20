@@ -130,13 +130,6 @@ func (ctx TerragruntParsingContext) DecodeBaseBlocks(log log.Logger, path string
 	parsingContext := ctx.ParsingContext.
 		WithDecodeList(config.DependencyBlock, config.DependenciesBlock, config.TerraformBlock)
 
-	// Mirror Terragrunt parse flow: preload unit values so `values.*` can be used in locals.
-	unitValues, err := config.ReadValues(ctx.Context, log, parsingContext.TerragruntOptions, filepath.Dir(path))
-	if err != nil {
-		return nil, err
-	}
-	parsingContext = parsingContext.WithValues(unitValues)
-
 	file, err := hclparse.NewParser(ctx.ParsingContext.ParserOptions...).ParseFromFile(path)
 	if err != nil {
 		return nil, err
