@@ -689,3 +689,10 @@ func TestStack(t *testing.T) {
 		filepath.Join("..", "test_examples", "stack"),
 	})
 }
+
+func TestValues(t *testing.T) {
+	runTest(t, filepath.Join("golden", "values.yaml"), []string{
+		"--root",
+		filepath.Join("..", "test_examples", "values"),
+	})
+}
