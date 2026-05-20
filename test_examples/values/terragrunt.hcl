@@ -1,5 +1,10 @@
+locals {
+  source_base_url   = "git::git@github.com:transcend-io/terraform-aws-fargate-container"
+  default_role_name = "${values.environment}-${values.project}-eks-${basename(get_terragrunt_dir())}"
+}
+
 terraform {
-  source = "git::git@github.com:transcend-io/terraform-aws-fargate-container?ref=v0.0.4"
+  source = "${local.source_base_url}?ref=${values.module_ref}"
 }
 
 inputs = {
