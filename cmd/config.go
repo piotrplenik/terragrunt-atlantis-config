@@ -5,6 +5,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/gruntwork-io/terragrunt/pkg/log"
+	atlantis "github.com/runatlantis/atlantis/server/core/config/raw"
 )
 
 // Represents an entire config file
@@ -26,7 +27,7 @@ type AtlantisConfig struct {
 
 	// Workflows, which are not managed by this library other than
 	// the fact that this library preserves any existing workflows
-	Workflows interface{} `json:"workflows,omitempty"`
+	Workflows map[string]atlantis.Workflow `json:"workflows,omitempty"`
 }
 
 // Represents an Atlantis Project directory
